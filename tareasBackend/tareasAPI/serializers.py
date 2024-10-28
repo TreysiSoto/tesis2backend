@@ -1,27 +1,29 @@
-from rest_framework import serializers # type: ignore
+from rest_framework import serializers  # type: ignore
 from . import models
 from django.contrib.auth.hashers import make_password  # type: ignore # Importa make_password
 
-class RolSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.Rol
-        fields = ['id', 'nombre']  # Incluye el campo 'id' si lo necesitas
-        
 class UsuarioSerializer(serializers.ModelSerializer):
+    # Definimos el campo 'rol' como un ChoiceField
+    rol = serializers.ChoiceField(choices=models.Usuario.ROL_CHOICES)
+
     class Meta:
         model = models.Usuario
-        fields = ['correo', 'nombre', 'rol', 'password']
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = ['id', 'nombre', 'correo', 'password', 'rol']  # Incluir todos los campos necesarios
+        extra_kwargs = {
+            'password': {'write_only': True}  # Asegura que la contraseña solo se escriba
+        }
 
     def create(self, validated_data):
-        usuario = models.Usuario(
-            correo=validated_data['correo'],
-            nombre=validated_data['nombre'],
-            rol=validated_data['rol']
-        )
-        usuario.set_password(validated_data['password'])  # Hashea la contraseña
-        usuario.save()
-        return usuario
+        password = validated_data.pop('password')  # Extraemos la contraseña
+        usuario = models.Usuario(**validated_data)  # Creamos el objeto Usuario
+        usuario.set_password(password)  # Hasheamos la contraseña
+        usuario.save()  # Guardamos el usuario
+        return usuario  # Retornamos el usuario creado
+
+    
+class LoginSerializer(serializers.Serializer):
+    correo = serializers.EmailField(required=True)
+    password = serializers.CharField(write_only=True, required=True)
 
 class TrabajadorSerializer(serializers.ModelSerializer):
     class Meta:
@@ -45,3 +47,9 @@ class NotificacionSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Notificacion
         fields = ['id', 'mensaje', 'fecha']
+
+class PublicacionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Publicacion
+        fields = ['id', 'titulo', 'descripcion', 'ubicacion', 'fecha_limite', 
+                  'empleador', 'fecha_publicacion']

@@ -6,10 +6,10 @@ from django.contrib import admin
 #Email address: trey@gmail.com
 #contra: enf.........
 
-from .models import Rol, Usuario, Trabajador, Empleador, Opinion, Notificacion
+from .models import Publicacion, Usuario, Trabajador, Empleador, Opinion, Notificacion
 
 # Registrar los modelos en el panel de administración
-admin.site.register(Rol)
+admin.site.register(Publicacion)
 admin.site.register(Usuario)
 admin.site.register(Trabajador)
 admin.site.register(Empleador)
